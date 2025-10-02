@@ -20,7 +20,7 @@
       border-radius: 12px;
       box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
       text-align: center;
-      width: 350px;
+      width: 400px;
     }
 
     h2 {
@@ -58,23 +58,37 @@
       color: #222;
       font-weight: bold;
     }
+
+    .birthday {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #ff5722;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Age Calculator</h2>
+    <h2>Age Calculator 🎂</h2>
     <input type="date" id="dob" />
     <br>
     <button onclick="calculateAge()">Calculate Age</button>
     <div class="result" id="result"></div>
+    <div class="birthday" id="birthday"></div>
   </div>
 
   <script>
+    let countdownInterval; // To clear previous countdowns
+
     function calculateAge() {
       const dob = document.getElementById("dob").value;
+      const result = document.getElementById("result");
+      const birthdayMsg = document.getElementById("birthday");
+
       if (!dob) {
-        document.getElementById("result").innerText = "⚠ Please enter your date of birth!";
-        document.getElementById("result").style.color = "red";
+        result.innerText = "⚠ Please enter your date of birth!";
+        result.style.color = "red";
+        birthdayMsg.innerText = "";
         return;
       }
 
@@ -82,8 +96,9 @@
       const today = new Date();
 
       if (dobDate > today) {
-        document.getElementById("result").innerText = "⚠ Date of Birth cannot be in the future!";
-        document.getElementById("result").style.color = "red";
+        result.innerText = "⚠ Date of Birth cannot be in the future!";
+        result.style.color = "red";
+        birthdayMsg.innerText = "";
         return;
       }
 
@@ -91,22 +106,52 @@
       let months = today.getMonth() - dobDate.getMonth();
       let days = today.getDate() - dobDate.getDate();
 
-      // Adjust if days are negative
       if (days < 0) {
         months--;
         const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
         days += prevMonth.getDate();
       }
 
-      // Adjust if months are negative
       if (months < 0) {
         years--;
         months += 12;
       }
 
-      document.getElementById("result").innerText =
-        `🎉 You are ${years} Years, ${months} Months, and ${days} Days old.`;
-        document.getElementById("result").style.color = "black";
+      result.innerText = `🎉 You are ${years} Years, ${months} Months, and ${days} Days old.`;
+      result.style.color = "black";
+
+      // Clear previous countdown if running
+      clearInterval(countdownInterval);
+
+      // Setup next birthday
+      let nextBirthday = new Date(today.getFullYear(), dobDate.getMonth(), dobDate.getDate());
+
+      // If birthday already passed this year → move to next year
+      if (
+        today.getMonth() > dobDate.getMonth() ||
+        (today.getMonth() === dobDate.getMonth() && today.getDate() > dobDate.getDate())
+      ) {
+        nextBirthday.setFullYear(today.getFullYear() + 1);
+      }
+
+      // Live countdown
+      countdownInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = nextBirthday.getTime() - now;
+
+        if (distance <= 0) {
+          clearInterval(countdownInterval);
+          birthdayMsg.innerText = "🥳 Happy Birthday! 🎂🎉";
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        birthdayMsg.innerText = `🎂 Next Birthday in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }, 500);
     }
   </script>
 </body>
